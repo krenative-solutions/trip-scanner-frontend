@@ -24,6 +24,12 @@ export interface FlightOffer {
   stops: number;
   durationMinutes: number;
 
+  // Coordinates for map display
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  } | null;
+
   // Phase 1: Booking information (nullable)
   airline: string | null;
   airlineCode: string | null;
@@ -38,6 +44,9 @@ export interface FlightOffer {
 
   // Phase 3: Booking links (nullable)
   bookingOptions: BookingOption[] | null;
+
+  // Phase 4: Return flight for round-trip searches (nullable)
+  returnFlight: ReturnFlight | null;
 }
 
 /**
@@ -87,12 +96,26 @@ export interface BookingOption {
 }
 
 /**
+ * Return flight information for round-trip searches
+ */
+export interface ReturnFlight {
+  stops: number;
+  durationMinutes: number;
+  departureTime: string; // ISO-8601 datetime
+  arrivalTime: string; // ISO-8601 datetime
+  segments: FlightSegment[];
+  layovers: Layover[];
+}
+
+/**
  * Search request payload
  */
 export interface SearchRequest {
   destination: string; // IATA code (e.g., "BKK")
   region: string; // EUROPE, NORTH_AMERICA, etc.
   maxResults: number; // 5-50
+  departureDate?: string; // Optional, format: YYYY-MM-DD (e.g., "2025-12-25")
+  returnDate?: string; // Optional, format: YYYY-MM-DD (for round-trip searches)
 }
 
 /**
