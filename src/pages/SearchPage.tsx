@@ -193,11 +193,9 @@ export function SearchPage() {
                   value={departureDate}
                   onChange={(e) => setDepartureDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
+                  className="w-full min-w-0 px-2.5 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
                            focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                           transition-colors text-sm sm:text-base
-                           [&::-webkit-calendar-picker-indicator]:opacity-100
-                           [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                           transition-colors text-sm sm:text-base"
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Leave empty for flexible date search
@@ -219,11 +217,9 @@ export function SearchPage() {
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
                     min={departureDate || new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
+                    className="w-full min-w-0 px-2.5 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
                              focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                             transition-colors text-sm sm:text-base
-                             [&::-webkit-calendar-picker-indicator]:opacity-100
-                             [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                             transition-colors text-sm sm:text-base"
                   />
                   <p className="mt-2 text-xs text-gray-500">
                     Leave empty for flexible return date search
