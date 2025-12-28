@@ -128,8 +128,8 @@ export function SearchPage() {
 
         {/* Search Form */}
         <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 slide-up">
-            <form onSubmit={handleSearch} className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 slide-up overflow-hidden">
+            <form onSubmit={handleSearch} className="space-y-5 sm:space-y-6">
               {/* Destination */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -193,9 +193,11 @@ export function SearchPage() {
                   value={departureDate}
                   onChange={(e) => setDepartureDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
                            focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                           transition-colors"
+                           transition-colors text-sm sm:text-base
+                           [&::-webkit-calendar-picker-indicator]:opacity-100
+                           [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Leave empty for flexible date search
@@ -217,9 +219,11 @@ export function SearchPage() {
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
                     min={departureDate || new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
                              focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                             transition-colors"
+                             transition-colors text-sm sm:text-base
+                             [&::-webkit-calendar-picker-indicator]:opacity-100
+                             [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                   />
                   <p className="mt-2 text-xs text-gray-500">
                     Leave empty for flexible return date search

@@ -9,12 +9,12 @@ interface TripTypeToggleProps {
 
 export function TripTypeToggle({ value, onChange }: TripTypeToggleProps) {
   return (
-    <div className="inline-flex rounded-lg border-2 border-gray-200 bg-gray-50 p-1">
+    <div className="inline-flex w-full sm:w-auto rounded-lg border-2 border-gray-200 bg-gray-50 p-1">
       <button
         type="button"
         onClick={() => onChange('one-way')}
         className={`
-          flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all
+          flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all
           ${
             value === 'one-way'
               ? 'bg-white text-primary-700 shadow-sm'
@@ -23,13 +23,13 @@ export function TripTypeToggle({ value, onChange }: TripTypeToggleProps) {
         `}
       >
         <ArrowRight className="w-4 h-4" />
-        One-way
+        <span>One-way</span>
       </button>
       <button
         type="button"
         onClick={() => onChange('round-trip')}
         className={`
-          flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all
+          flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all
           ${
             value === 'round-trip'
               ? 'bg-white text-primary-700 shadow-sm'
@@ -38,7 +38,7 @@ export function TripTypeToggle({ value, onChange }: TripTypeToggleProps) {
         `}
       >
         <ArrowRightLeft className="w-4 h-4" />
-        Round-trip
+        <span>Round-trip</span>
       </button>
     </div>
   );
