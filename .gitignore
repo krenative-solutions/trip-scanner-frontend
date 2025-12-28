@@ -26,4 +26,7 @@ dist-ssr
 # Claude Code
 .claude/
 .vercel
+
+# Environment files
 .env*.local
+.env

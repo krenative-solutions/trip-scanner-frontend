@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Scanner - CORS Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+        }
+        .success { border-color: #00ff00; }
+        .error { border-color: #ff0000; color: #ff0000; }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        button:hover { background: #00dd00; }
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Trip Scanner CORS Debugger</h1>
+
+    <div class="test">
+        <h2>Current Configuration</h2>
+        <pre id="config"></pre>
+    </div>
+
+    <div class="test">
+        <h2>Test 1: Backend Health Check</h2>
+        <button onclick="testHealth()">Run Test</button>
+        <pre id="health-result">Click button to test...</pre>
+    </div>
+
+    <div class="test">
+        <h2>Test 2: CORS Preflight</h2>
+        <button onclick="testCORS()">Run Test</button>
+        <pre id="cors-result">Click button to test...</pre>
+    </div>
+
+    <div class="test">
+        <h2>Test 3: Full API Request</h2>
+        <button onclick="testAPI()">Run Test</button>
+        <pre id="api-result">Click button to test...</pre>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://trip-scanner-ec127ad298df.herokuapp.com';
+
+        // Display current configuration
+        document.getElementById('config').textContent =
+            `Frontend URL: ${window.location.origin}\n` +
+            `Backend URL: ${BACKEND_URL}\n` +
+            `User Agent: ${navigator.userAgent}`;
+
+        async function testHealth() {
+            const result = document.getElementById('health-result');
+            result.textContent = 'Testing...';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/health`);
+                const text = await response.text();
+
+                result.textContent =
+                    `Status: ${response.status}\n` +
+                    `Response: ${text}\n` +
+                    `Headers:\n${Array.from(response.headers.entries()).map(([k,v]) => `  ${k}: ${v}`).join('\n')}`;
+
+                result.parentElement.className = response.ok ? 'test success' : 'test error';
+            } catch (error) {
+                result.textContent = `ERROR: ${error.message}\n\n${error.stack}`;
+                result.parentElement.className = 'test error';
+            }
+        }
+
+        async function testCORS() {
+            const result = document.getElementById('cors-result');
+            result.textContent = 'Testing CORS preflight...';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/health`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type'
+                    }
+                });
+
+                result.textContent =
+                    `Status: ${response.status}\n` +
+                    `CORS Headers:\n` +
+                    `  Access-Control-Allow-Origin: ${response.headers.get('access-control-allow-origin') || 'NOT SET'}\n` +
+                    `  Access-Control-Allow-Methods: ${response.headers.get('access-control-allow-methods') || 'NOT SET'}\n` +
+                    `  Access-Control-Allow-Headers: ${response.headers.get('access-control-allow-headers') || 'NOT SET'}\n\n` +
+                    `All Headers:\n${Array.from(response.headers.entries()).map(([k,v]) => `  ${k}: ${v}`).join('\n')}`;
+
+                result.parentElement.className = response.ok ? 'test success' : 'test error';
+            } catch (error) {
+                result.textContent = `ERROR: ${error.message}\n\n${error.stack}`;
+                result.parentElement.className = 'test error';
+            }
+        }
+
+        async function testAPI() {
+            const result = document.getElementById('api-result');
+            result.textContent = 'Testing full API request...';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        destination: 'BKK',
+                        region: 'EUROPE',
+                        maxResults: 5
+                    })
+                });
+
+                const data = await response.json();
+
+                result.textContent =
+                    `Status: ${response.status}\n` +
+                    `CORS Header: ${response.headers.get('access-control-allow-origin') || 'NOT SET'}\n\n` +
+                    `Response:\n${JSON.stringify(data, null, 2)}`;
+
+                result.parentElement.className = response.ok ? 'test success' : 'test error';
+            } catch (error) {
+                result.textContent = `ERROR: ${error.message}\n\n${error.stack}`;
+                result.parentElement.className = 'test error';
+            }
+        }
+    </script>
+</body>
+</html>

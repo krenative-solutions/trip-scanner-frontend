@@ -8,7 +8,7 @@ The CI/CD pipeline includes:
 - **Continuous Integration**: Build, type-check, and lint on every push/PR
 - **Preview Deployments**: Automatic preview URLs for pull requests
 - **Production Deployment**: Automatic deployment to Vercel on merge to master
-- **Security Scanning**: Weekly security audits and dependency checks
+- **Security Scanning**: Weekly security audits and dependency checkssea
 - **Dependency Updates**: Automated dependency updates via Dependabot
 
 ## Prerequisites

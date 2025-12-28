@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plane, TrendingDown } from 'lucide-react';
-import { Button } from '../components/ui';
+import { Search, Plane, TrendingDown, Clock } from 'lucide-react';
+import { Button, AirportAutocomplete, TripTypeToggle, type TripType } from '../components/ui';
 import type { Region } from '../types';
+import { useRecentSearches } from '../hooks/useRecentSearches';
+import { getAirportByCode } from '../data/airports';
 
 /**
  * SearchPage - Home page with flight search form
@@ -15,9 +17,13 @@ import type { Region } from '../types';
  */
 export function SearchPage() {
   const navigate = useNavigate();
-  const [destination, setDestination] = useState('BKK');
+  const { recentSearches, saveSearch, clearRecentSearches } = useRecentSearches();
+  const [destination, setDestination] = useState('');
   const [region, setRegion] = useState<Region>('EUROPE');
+  const [tripType, setTripType] = useState<TripType>('round-trip');
   const [maxResults, setMaxResults] = useState(10);
+  const [departureDate, setDepartureDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -25,8 +31,8 @@ export function SearchPage() {
     setError(null);
 
     // Validation
-    if (destination.length !== 3) {
-      setError('Destination must be a 3-letter IATA code');
+    if (!destination || destination.length !== 3) {
+      setError('Please select a valid destination airport');
       return;
     }
 
@@ -35,12 +41,60 @@ export function SearchPage() {
       return;
     }
 
+    // Validate dates for round-trip
+    if (tripType === 'round-trip' && departureDate && !returnDate) {
+      setError('Please select a return date for round-trip flights');
+      return;
+    }
+
+    if (departureDate && returnDate && returnDate <= departureDate) {
+      setError('Return date must be after departure date');
+      return;
+    }
+
+    // Save search to recent searches
+    saveSearch({
+      destination,
+      region,
+      maxResults,
+      departureDate: departureDate || undefined,
+      returnDate: tripType === 'round-trip' ? returnDate || undefined : undefined,
+    });
+
     // Navigate to results page
-    navigate(`/results?destination=${destination}&region=${region}&maxResults=${maxResults}`);
+    const params = new URLSearchParams({
+      destination,
+      region,
+      maxResults: maxResults.toString(),
+    });
+    if (departureDate) {
+      params.append('departureDate', departureDate);
+    }
+    if (tripType === 'round-trip' && returnDate) {
+      params.append('returnDate', returnDate);
+    }
+    navigate(`/results?${params.toString()}`);
   };
 
   const handleDestinationChange = (value: string) => {
     setDestination(value.toUpperCase());
+    setError(null);
+  };
+
+  const handleTripTypeChange = (type: TripType) => {
+    setTripType(type);
+    if (type === 'one-way') {
+      setReturnDate('');
+    }
+  };
+
+  const loadRecentSearch = (search: typeof recentSearches[0]) => {
+    setDestination(search.destination);
+    setRegion(search.region);
+    setMaxResults(search.maxResults);
+    setDepartureDate(search.departureDate || '');
+    setReturnDate(search.returnDate || '');
+    setTripType(search.returnDate ? 'round-trip' : 'one-way');
     setError(null);
   };
 
@@ -78,28 +132,15 @@ export function SearchPage() {
             <form onSubmit={handleSearch} className="space-y-6">
               {/* Destination */}
               <div>
-                <label
-                  htmlFor="destination"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Destination Airport
                 </label>
-                <input
-                  type="text"
-                  id="destination"
+                <AirportAutocomplete
                   value={destination}
-                  onChange={(e) => handleDestinationChange(e.target.value)}
-                  placeholder="e.g., BKK, NYC, LON"
-                  maxLength={3}
+                  onChange={handleDestinationChange}
                   required
                   autoFocus
-                  className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg
-                           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                           transition-colors uppercase"
                 />
-                <p className="mt-2 text-xs text-gray-500">
-                  Enter 3-letter IATA code • Examples: BKK (Bangkok), NYC (New York), LON (London)
-                </p>
               </div>
 
               {/* Region */}
@@ -129,6 +170,62 @@ export function SearchPage() {
                   We'll search for flights departing from airports in this region
                 </p>
               </div>
+
+              {/* Trip Type Toggle */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Trip Type
+                </label>
+                <TripTypeToggle value={tripType} onChange={handleTripTypeChange} />
+              </div>
+
+              {/* Departure Date */}
+              <div>
+                <label
+                  htmlFor="departureDate"
+                  className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                  Departure Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  id="departureDate"
+                  value={departureDate}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                           transition-colors"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Leave empty for flexible date search
+                </p>
+              </div>
+
+              {/* Return Date - Only show for round-trip */}
+              {tripType === 'round-trip' && (
+                <div>
+                  <label
+                    htmlFor="returnDate"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Return Date {departureDate && '(Optional)'}
+                  </label>
+                  <input
+                    type="date"
+                    id="returnDate"
+                    value={returnDate}
+                    onChange={(e) => setReturnDate(e.target.value)}
+                    min={departureDate || new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg
+                             focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                             transition-colors"
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    Leave empty for flexible return date search
+                  </p>
+                </div>
+              )}
 
               {/* Max Results */}
               <div>
@@ -182,6 +279,86 @@ export function SearchPage() {
               </p>
             </form>
           </div>
+
+          {/* Recent Searches */}
+          {recentSearches.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gray-500" />
+                  <p className="text-sm font-semibold text-gray-700">Recent Searches</p>
+                </div>
+                <button
+                  onClick={clearRecentSearches}
+                  className="text-xs text-gray-500 hover:text-danger-600 transition-colors"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="space-y-2">
+                {recentSearches.map((search, index) => {
+                  const airport = getAirportByCode(search.destination);
+                  const originAirport = search.cheapestOrigin
+                    ? getAirportByCode(search.cheapestOrigin)
+                    : null;
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => loadRecentSearch(search)}
+                      className="w-full p-3 bg-white border-2 border-gray-200 rounded-lg
+                               hover:border-primary-500 hover:bg-primary-50 transition-colors
+                               text-left group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-bold text-primary-600">
+                              {search.destination}
+                            </span>
+                            {airport && (
+                              <span className="text-xs text-gray-600 truncate">
+                                {airport.city}, {airport.country}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                            <span>From {search.region.replace('_', ' ')}</span>
+                            {search.departureDate && (
+                              <span>
+                                {search.returnDate ? 'Round-trip' : 'One-way'} • {search.departureDate}
+                                {search.returnDate && ` - ${search.returnDate}`}
+                              </span>
+                            )}
+                            {search.resultsCount && (
+                              <span>• {search.resultsCount} results</span>
+                            )}
+                          </div>
+                          {originAirport && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Cheapest from {originAirport.code} ({originAirport.city})
+                            </div>
+                          )}
+                        </div>
+                        {search.cheapestPrice && (
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-xs text-gray-500 mb-0.5">from</div>
+                            <div className="text-base font-bold text-success-600 whitespace-nowrap">
+                              {new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: search.cheapestPrice.currency,
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                              }).format(search.cheapestPrice.amount)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Popular destinations */}
           <div className="mt-8 text-center">

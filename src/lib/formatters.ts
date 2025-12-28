@@ -58,15 +58,16 @@ export function formatTime(dateString: string): string {
 }
 
 /**
- * Format ISO datetime to elegant full date with time
- * @example formatDateTime('2025-12-25T10:30:00Z') // "Wed, Dec 25 • 10:30 AM"
+ * Format ISO datetime to elegant full date with time (includes year)
+ * @example formatDateTime('2025-12-25T10:30:00Z') // "Wed, Dec 25, 2025 • 10:30 AM"
  */
 export function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
-  const dayMonth = new Intl.DateTimeFormat('en-US', {
+  const dayMonthYear = new Intl.DateTimeFormat('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
+    year: 'numeric',
   }).format(date);
 
   const time = new Intl.DateTimeFormat('en-US', {
@@ -74,7 +75,7 @@ export function formatDateTime(dateString: string): string {
     minute: '2-digit',
   }).format(date);
 
-  return `${dayMonth} • ${time}`;
+  return `${dayMonthYear} • ${time}`;
 }
 
 /**
