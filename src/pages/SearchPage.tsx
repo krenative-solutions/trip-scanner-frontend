@@ -179,53 +179,64 @@ export function SearchPage() {
                 <TripTypeToggle value={tripType} onChange={handleTripTypeChange} />
               </div>
 
-              {/* Departure Date */}
+              {/* Travel Dates */}
               <div>
-                <label
-                  htmlFor="departureDate"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Departure Date (Optional)
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Travel Dates (Optional)
                 </label>
-                <input
-                  type="date"
-                  id="departureDate"
-                  value={departureDate}
-                  onChange={(e) => setDepartureDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full min-w-0 px-2.5 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
-                           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                           transition-colors text-sm sm:text-base"
-                />
+                <div className={`grid gap-3 ${tripType === 'round-trip' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                  {/* Departure Date */}
+                  <div className="relative">
+                    <label
+                      htmlFor="departureDate"
+                      className="block text-xs font-medium text-gray-600 mb-1.5"
+                    >
+                      Departure
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        id="departureDate"
+                        value={departureDate}
+                        onChange={(e) => setDepartureDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        placeholder="Select date"
+                        className="w-full px-3 py-2.5 pr-10 border-2 border-gray-300 rounded-lg
+                                 focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                                 transition-colors text-sm bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Return Date - Only show for round-trip */}
+                  {tripType === 'round-trip' && (
+                    <div className="relative">
+                      <label
+                        htmlFor="returnDate"
+                        className="block text-xs font-medium text-gray-600 mb-1.5"
+                      >
+                        Return
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="date"
+                          id="returnDate"
+                          value={returnDate}
+                          onChange={(e) => setReturnDate(e.target.value)}
+                          min={departureDate || new Date().toISOString().split('T')[0]}
+                          placeholder="Select date"
+                          className="w-full px-3 py-2.5 pr-10 border-2 border-gray-300 rounded-lg
+                                   focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                                   transition-colors text-sm bg-white"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <p className="mt-2 text-xs text-gray-500">
                   Leave empty for flexible date search
                 </p>
               </div>
-
-              {/* Return Date - Only show for round-trip */}
-              {tripType === 'round-trip' && (
-                <div>
-                  <label
-                    htmlFor="returnDate"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Return Date {departureDate && '(Optional)'}
-                  </label>
-                  <input
-                    type="date"
-                    id="returnDate"
-                    value={returnDate}
-                    onChange={(e) => setReturnDate(e.target.value)}
-                    min={departureDate || new Date().toISOString().split('T')[0]}
-                    className="w-full min-w-0 px-2.5 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg
-                             focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-                             transition-colors text-sm sm:text-base"
-                  />
-                  <p className="mt-2 text-xs text-gray-500">
-                    Leave empty for flexible return date search
-                  </p>
-                </div>
-              )}
 
               {/* Max Results */}
               <div>

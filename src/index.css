@@ -124,26 +124,14 @@ html {
   animation: slideUp 0.3s ease-out;
 }
 
-/* Date input mobile fixes */
-input[type="date"] {
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Ensure calendar icon is visible on iOS/Safari */
+/* Date input styling */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 1;
-  display: block;
-  background: transparent;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
+  opacity: 1;
+  padding: 0;
+  margin-left: 0.25rem;
 }
 
-/* Fix for iOS Safari date input */
 input[type="date"]::-webkit-date-and-time-value {
   text-align: left;
-  min-height: 1.5rem;
 }
